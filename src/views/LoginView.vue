@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { extractErrorMessage } from '../utils/errors'
+import Spinner from '../components/Spinner.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -28,54 +29,171 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="flex min-h-full items-center justify-center px-4 py-12">
-    <div class="w-full max-w-sm">
-      <h1 class="text-2xl font-semibold tracking-tight text-text text-center">
-        Activity<span class="text-accent">.</span>
+  <div class="login">
+    <div class="login__card">
+      <h1 class="login__title">
+        Activity<span class="login__title-dot">.</span>
       </h1>
-      <p class="mt-1 text-sm text-text-muted text-center">Log in op je account</p>
+      <p class="login__subtitle">Log in op je account</p>
 
-      <form @submit.prevent="onSubmit" class="mt-8 space-y-4">
+      <form @submit.prevent="onSubmit" class="login__form">
         <div>
-          <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+          <label class="login__label">
             E-mailadres
           </label>
           <input
             v-model="email"
             type="email"
             required
-            class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+            class="login__input"
           />
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+          <label class="login__label">
             Wachtwoord
           </label>
           <input
             v-model="password"
             type="password"
             required
-            class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+            class="login__input"
           />
         </div>
 
-        <p v-if="error" class="text-sm text-danger">{{ error }}</p>
+        <p v-if="error" class="login__error">{{ error }}</p>
 
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-accent px-3.5 py-2.5 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 transition-colors"
+          class="login__submit"
         >
+          <Spinner v-if="loading" size="14" />
           {{ loading ? 'Bezig...' : 'Inloggen' }}
         </button>
       </form>
 
-      <p class="mt-6 text-center text-sm text-text-muted">
+      <p class="login__footer">
         Nog geen account?
-        <RouterLink to="/register" class="font-medium text-accent-light hover:text-accent">
+        <RouterLink to="/register" class="login__footer-link">
           Registreren
         </RouterLink>
       </p>
     </div>
   </div>
 </template>
+
+<style scoped>
+.login {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.login__card {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.login__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.login__title-dot {
+  color: var(--color-accent);
+}
+
+.login__subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.login__form {
+  margin-top: 2rem;
+}
+
+.login__form > * + * {
+  margin-top: 1rem;
+}
+
+.login__label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.login__input {
+  display: block;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  outline: none;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.login__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.login__input:focus {
+  border-color: var(--color-accent);
+}
+
+.login__error {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+}
+
+.login__submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-accent);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.login__submit:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
+}
+
+.login__submit:disabled {
+  opacity: 0.5;
+}
+
+.login__footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.login__footer-link {
+  font-weight: 500;
+  color: var(--color-accent-light);
+}
+
+.login__footer-link:hover {
+  color: var(--color-accent);
+}
+</style>

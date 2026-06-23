@@ -4,10 +4,10 @@ defineProps({
 })
 
 const styles = {
-  HOST: 'bg-accent/15 text-accent-light',
-  INVITED: 'bg-accent/15 text-accent-light',
-  ACCEPTED: 'bg-success-strong/15 text-success',
-  DECLINED: 'bg-danger-strong/15 text-danger',
+  HOST: 'participant-badge--host',
+  INVITED: 'participant-badge--invited',
+  ACCEPTED: 'participant-badge--accepted',
+  DECLINED: 'participant-badge--declined',
 }
 
 const labels = {
@@ -20,9 +20,39 @@ const labels = {
 
 <template>
   <span
-    class="inline-block rounded-full px-2.5 py-1 text-[11px] font-medium"
+    class="participant-badge"
     :class="styles[status]"
   >
     {{ labels[status] ?? status }}
   </span>
 </template>
+
+<style scoped>
+.participant-badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.participant-badge--host {
+  background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  color: var(--color-accent-light);
+}
+
+.participant-badge--invited {
+  background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  color: var(--color-accent-light);
+}
+
+.participant-badge--accepted {
+  background-color: color-mix(in srgb, var(--color-success-strong) 15%, transparent);
+  color: var(--color-success);
+}
+
+.participant-badge--declined {
+  background-color: color-mix(in srgb, var(--color-danger-strong) 15%, transparent);
+  color: var(--color-danger);
+}
+</style>

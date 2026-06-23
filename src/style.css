@@ -26,5 +26,7 @@ body,
 }
 
 body {
-  @apply bg-bg text-text font-sans;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 }

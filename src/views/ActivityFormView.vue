@@ -7,6 +7,7 @@ import { useGroupsStore } from '../stores/groups'
 import { useAuthStore } from '../stores/auth'
 import { extractErrorMessage } from '../utils/errors'
 import { toDateTimeInputValue } from '../utils/date'
+import Spinner from '../components/Spinner.vue'
 
 const props = defineProps({
   id: { type: String, default: null },
@@ -108,50 +109,53 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-    <RouterLink to="/activities" class="text-sm font-medium text-accent-light hover:text-accent">
+  <div class="activity-form">
+    <RouterLink to="/activities" class="activity-form__back-link">
       &larr; Terug naar activiteiten
     </RouterLink>
 
-    <h1 class="mt-4 text-2xl font-semibold tracking-tight text-text">
+    <h1 class="activity-form__title">
       {{ isEdit ? 'Activiteit bewerken' : 'Nieuwe activiteit' }}
     </h1>
 
-    <p v-if="loading" class="mt-6 text-sm text-text-muted">Laden...</p>
+    <div v-if="loading" class="activity-form__loading">
+      <Spinner size="16" />
+      Laden...
+    </div>
 
-    <form v-else @submit.prevent="onSubmit" class="mt-6 space-y-5">
+    <form v-else @submit.prevent="onSubmit" class="activity-form__form">
       <div>
-        <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">Naam *</label>
+        <label class="activity-form__label">Naam *</label>
         <input
           v-model="form.name"
           type="text"
           required
-          class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+          class="activity-form__input"
         />
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">Locatie</label>
+        <label class="activity-form__label">Locatie</label>
         <input
           v-model="form.location"
           type="text"
-          class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+          class="activity-form__input"
         />
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+        <label class="activity-form__label">
           Beschrijving
         </label>
         <textarea
           v-model="form.description"
           rows="3"
-          class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+          class="activity-form__input"
         />
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+        <label class="activity-form__label">
           Maximum aantal deelnemers
         </label>
         <input
@@ -159,73 +163,254 @@ async function onSubmit() {
           type="number"
           min="1"
           placeholder="Onbeperkt"
-          class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted outline-none focus:border-accent transition-colors"
+          class="activity-form__input"
         />
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+      <div class="activity-form__time-grid">
         <div>
-          <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+          <label class="activity-form__label">
             Starttijd
           </label>
           <input
             v-model="form.startTime"
             type="datetime-local"
-            class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text outline-none focus:border-accent transition-colors [color-scheme:dark]"
+            class="activity-form__input activity-form__input--datetime"
           />
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+          <label class="activity-form__label">
             Eindtijd
           </label>
           <input
             v-model="form.endTime"
             type="datetime-local"
-            class="block w-full rounded-lg border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-text outline-none focus:border-accent transition-colors [color-scheme:dark]"
+            class="activity-form__input activity-form__input--datetime"
           />
         </div>
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wide text-text-muted mb-1.5">
+        <label class="activity-form__label">
           Groepsleden uitnodigen
         </label>
-        <p v-if="!groupMembers.length" class="mt-1 text-sm text-text-muted">
+        <p v-if="!groupMembers.length" class="activity-form__no-members">
           Je hebt nog geen groepsleden om uit te nodigen. Word lid van een groep om mensen te kunnen
           uitnodigen.
         </p>
         <div
           v-else
-          class="mt-2 max-h-48 overflow-y-auto rounded-lg border border-border divide-y divide-border"
+          class="activity-form__members-list"
         >
           <label
             v-for="user in groupMembers"
             :key="user.id"
-            class="flex items-center gap-3 px-3.5 py-2.5 text-sm hover:bg-white/5 transition-colors"
+            class="activity-form__member-row"
           >
             <input
               type="checkbox"
               :checked="form.invitedUserIds.includes(user.id)"
               @change="toggleInvitee(user.id)"
-              class="rounded border-border-strong bg-surface text-accent focus:ring-accent"
+              class="activity-form__checkbox"
             />
-            <span class="text-text">{{ user.name }}</span>
-            <span class="text-text-muted">{{ user.email }}</span>
+            <span class="activity-form__member-name">{{ user.name }}</span>
+            <span class="activity-form__member-email">{{ user.email }}</span>
           </label>
         </div>
       </div>
 
-      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
+      <p v-if="error" class="activity-form__error">{{ error }}</p>
 
-      <div class="flex gap-3">
+      <div class="activity-form__actions">
         <button
           type="submit"
           :disabled="saving"
-          class="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 transition-colors"
+          class="activity-form__submit-btn"
         >
+          <Spinner v-if="saving" size="14" />
           {{ saving ? 'Opslaan...' : isEdit ? 'Wijzigingen opslaan' : 'Activiteit aanmaken' }}
         </button>
       </div>
     </form>
   </div>
 </template>
+
+<style scoped>
+.activity-form {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .activity-form {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.activity-form__back-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-accent-light);
+  transition: color 150ms ease;
+}
+
+.activity-form__back-link:hover {
+  color: var(--color-accent);
+}
+
+.activity-form__title {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+}
+
+.activity-form__loading {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.activity-form__form {
+  margin-top: 1.5rem;
+}
+
+.activity-form__form > * + * {
+  margin-top: 1.25rem;
+}
+
+.activity-form__label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.activity-form__input {
+  display: block;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  outline: none;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.activity-form__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.activity-form__input:focus {
+  border-color: var(--color-accent);
+}
+
+.activity-form__input--datetime {
+  color-scheme: dark;
+}
+
+.activity-form__time-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .activity-form__time-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.activity-form__no-members {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.activity-form__members-list {
+  margin-top: 0.5rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.activity-form__members-list > * + * {
+  border-top: 1px solid var(--color-border);
+}
+
+.activity-form__member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.activity-form__member-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.activity-form__checkbox {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.activity-form__checkbox:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.activity-form__member-name {
+  color: var(--color-text);
+}
+
+.activity-form__member-email {
+  color: var(--color-text-muted);
+}
+
+.activity-form__error {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+}
+
+.activity-form__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.activity-form__submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-accent);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.activity-form__submit-btn:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
+}
+
+.activity-form__submit-btn:disabled {
+  opacity: 0.5;
+}
+</style>
