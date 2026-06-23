@@ -21,14 +21,14 @@ const myParticipation = computed(() =>
 )
 
 const dotColor = computed(() => {
-  if (isHost.value) return 'bg-accent'
+  if (isHost.value) return 'activity-card__dot--host'
   switch (myParticipation.value?.status) {
     case 'ACCEPTED':
-      return 'bg-success'
+      return 'activity-card__dot--accepted'
     case 'DECLINED':
-      return 'bg-danger'
+      return 'activity-card__dot--declined'
     default:
-      return 'bg-warning'
+      return 'activity-card__dot--pending'
   }
 })
 </script>
@@ -36,17 +36,17 @@ const dotColor = computed(() => {
 <template>
   <RouterLink
     :to="{ name: 'activity-detail', params: { id: activity.id } }"
-    class="block rounded-xl border border-border bg-surface p-5 transition-colors hover:border-border-strong"
+    class="activity-card"
   >
-    <div class="flex items-start gap-3">
-      <span class="mt-1.5 w-2 h-2 rounded-full shrink-0" :class="dotColor" />
-      <div class="flex-1">
-        <div class="flex items-start justify-between gap-3">
-          <h3 class="text-sm font-medium text-text">{{ activity.name }}</h3>
-          <div class="flex shrink-0 items-center gap-2">
+    <div class="activity-card__body">
+      <span class="activity-card__dot" :class="dotColor" />
+      <div class="activity-card__content">
+        <div class="activity-card__header">
+          <h3 class="activity-card__title">{{ activity.name }}</h3>
+          <div class="activity-card__badges">
             <span
               v-if="status === 'FULL'"
-              class="rounded-full bg-danger-strong/15 px-2.5 py-1 text-[11px] font-medium text-danger"
+              class="activity-card__full-badge"
             >
               Vol
             </span>
@@ -55,19 +55,19 @@ const dotColor = computed(() => {
           </div>
         </div>
 
-        <p v-if="activity.location || activity.startTime" class="mt-1 text-xs text-text-muted">
+        <p v-if="activity.location || activity.startTime" class="activity-card__meta">
           <template v-if="activity.startTime">{{ formatDateTime(activity.startTime) }}</template>
           <template v-if="activity.startTime && activity.location"> · </template>
           <template v-if="activity.location">{{ activity.location }}</template>
         </p>
 
-        <p v-if="activity.description" class="mt-2 text-sm text-text-muted line-clamp-2">
+        <p v-if="activity.description" class="activity-card__description">
           {{ activity.description }}
         </p>
 
         <p
-          class="mt-3 text-xs font-medium tracking-wide"
-          :class="status === 'FULL' ? 'text-danger' : 'text-text-muted'"
+          class="activity-card__capacity"
+          :class="status === 'FULL' ? 'activity-card__capacity--full' : 'activity-card__capacity--default'"
         >
           <template v-if="activity.maxParticipants">
             {{ activity.currentParticipants ?? 0 }} van de {{ activity.maxParticipants }} deelnemers
@@ -78,3 +78,112 @@ const dotColor = computed(() => {
     </div>
   </RouterLink>
 </template>
+
+<style scoped>
+.activity-card {
+  display: block;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  padding: 1.25rem;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.activity-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.activity-card__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.activity-card__dot {
+  margin-top: 0.375rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.activity-card__dot--host {
+  background-color: var(--color-accent);
+}
+
+.activity-card__dot--accepted {
+  background-color: var(--color-success);
+}
+
+.activity-card__dot--declined {
+  background-color: var(--color-danger);
+}
+
+.activity-card__dot--pending {
+  background-color: var(--color-warning);
+}
+
+.activity-card__content {
+  flex: 1 1 0%;
+}
+
+.activity-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.activity-card__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.activity-card__badges {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activity-card__full-badge {
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--color-danger-strong) 15%, transparent);
+  padding: 0.25rem 0.625rem;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-danger);
+}
+
+.activity-card__meta {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.activity-card__description {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.activity-card__capacity {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.activity-card__capacity--full {
+  color: var(--color-danger);
+}
+
+.activity-card__capacity--default {
+  color: var(--color-text-muted);
+}
+</style>
